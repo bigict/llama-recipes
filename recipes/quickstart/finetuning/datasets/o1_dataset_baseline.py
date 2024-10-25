@@ -57,8 +57,9 @@ class o1preview(torch.utils.data.Dataset):
 
             # 选择得分最高且代码字符最少的提交作为终极答案
             def submission_key(submission):
-                score = submission.get("score")
-                return score if score else 0
+                score = submission.get("score") or 0
+                code_length =  len(submission.get("code"))
+                return score, -code_length
             best_submission = max(submissions, key=submission_key)
 
             return {
@@ -81,7 +82,7 @@ class o1preview(torch.utils.data.Dataset):
             return sample
 
         if tokenizer is not None:
-            self.dataset = self.dataset.map(tokenize_add_label, remove_columns=list(dataset.features))
+            self.dataset = self.dataset.map(tokenize_add_label, remove_columns=list(self.dataset.features))
 
     def __len__(self):
         return len(self.dataset)
